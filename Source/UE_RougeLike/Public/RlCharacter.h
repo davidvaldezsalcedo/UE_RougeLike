@@ -14,6 +14,10 @@ class UE_ROUGELIKE_API ARlCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+protected:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> ProjectileClass;
+	
 public:
 	// Sets default values for this character's properties
 	ARlCharacter();
@@ -30,6 +34,9 @@ protected:
 	virtual void BeginPlay() override;
 
 	void MoveForward(float value);
+	void MoveRight(float value);
+
+	void PrimaryAttack();
 
 public:	
 	// Called every frame
