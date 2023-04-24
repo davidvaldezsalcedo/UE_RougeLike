@@ -66,6 +66,8 @@ void ARlCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAxis("Turn", this,&APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this,&APawn::AddControllerPitchInput);
 
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ARlCharacter::Jump);
+	
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ARlCharacter::PrimaryAttack);
 }
 
