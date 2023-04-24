@@ -11,9 +11,9 @@ ARlExplosiveBarrel::ARlExplosiveBarrel()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	BarrelMeshComp = CreateDefaultSubobject<UStaticMeshComponent>("BarrelMeshComp");
+	BarrelMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BarrelMeshComp"));
 	RootComponent = BarrelMeshComp;
-	RadialForceComp = CreateDefaultSubobject<URadialForceComponent>("RadialForceComp");
+	RadialForceComp = CreateDefaultSubobject<URadialForceComponent>(TEXT("RadialForceComp"));
 	RadialForceComp->SetupAttachment(BarrelMeshComp);
 	RadialForceComp->Falloff = ERadialImpulseFalloff::RIF_Linear;
 	RadialForceComp->Radius = 1000;
