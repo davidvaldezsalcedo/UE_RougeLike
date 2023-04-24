@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "DrawDebugHelpers.h"
+#include "RlInteractionComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -14,12 +15,14 @@ ARlCharacter::ARlCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
+	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
 	SpringArmComp->bUsePawnControlRotation = true;
 	SpringArmComp->SetupAttachment(RootComponent);
 	
-	CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
+	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComp->SetupAttachment(SpringArmComp);
+
+	InteractionComp = CreateDefaultSubobject<URlInteractionComponent>(TEXT("InteractionComp"));
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
@@ -60,15 +63,17 @@ void ARlCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis("MoveForward", this,&ARlCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this,&ARlCharacter::MoveRight);
+	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this,&ARlCharacter::MoveForward);
+	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this,&ARlCharacter::MoveRight);
 	
-	PlayerInputComponent->BindAxis("Turn", this,&APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("LookUp", this,&APawn::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis(TEXT("Turn"), this,&APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis(TEXT("LookUp"), this,&APawn::AddControllerPitchInput);
 
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ARlCharacter::Jump);
+	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ARlCharacter::Jump);
 	
-	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ARlCharacter::PrimaryAttack);
+	PlayerInputComponent->BindAction(TEXT("PrimaryAttack"), IE_Pressed, this, &ARlCharacter::PrimaryAttack);
+	
+	PlayerInputComponent->BindAction(TEXT("PrimaryInteract"), IE_Pressed, this, &ARlCharacter::PrimaryInteract);
 }
 
 void ARlCharacter::MoveForward(float value)
@@ -93,12 +98,29 @@ void ARlCharacter::MoveRight(float value)
 
 void ARlCharacter::PrimaryAttack()
 {
-	FVector handLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+	PlayAnimMontage(AttackAnim);
+
+	GetWorldTimerManager().SetTimer(TimeHandle_PrimaryAttack, this, &ARlCharacter::PrimaryAttack_TimeElapsed, 0.2f);
+
+	// GetWorldTimerManager().ClearTimer(TimeHandle_PrimaryAttack);
+}
+
+void ARlCharacter::PrimaryAttack_TimeElapsed()
+{
+	FVector handLocation = GetMesh()->GetSocketLocation(TEXT("Muzzle_01"));
 	FTransform spawnTM = FTransform(GetControlRotation(), handLocation);
 
 	FActorSpawnParameters spawnParams;
 	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, spawnTM, spawnParams);
+	GetWorld()->SpawnActor<AActor>(ProjectileClass, spawnTM, spawnParams);	
+}
+
+void ARlCharacter::PrimaryInteract()
+{
+	if(InteractionComp)
+	{
+		InteractionComp->PrimaryInteract();
+	}
 }
 
